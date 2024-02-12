@@ -7,6 +7,8 @@ import equinox as eqx
 import jax
 import numpy as np
 import optax
+from jax.tree_util import tree_leaves, tree_map
+from jaxtyping import Array
 from scipy.sparse import load_npz
 
 from args import args
@@ -14,6 +16,26 @@ from ham import GeneralSpinsModel, exact
 from nets import ARNNDense, TwoBoOnlySkip
 
 dtype = np.float32
+
+
+def leaf_size_real_nonzero(x):
+    # Filter out equinox static fields
+    if not isinstance(x, Array):
+        return 0
+
+    # If some but not all elements are exactly float zero, that means they are masked
+    size = (x != 0).sum()
+    if size == 0:
+        size = x.size
+
+    if np.iscomplexobj(x):
+        size *= 2
+
+    return size
+
+
+def tree_size_real_nonzero(tree):
+    return sum(tree_leaves(tree_map(leaf_size_real_nonzero, tree)))
 
 
 def load_ham(ham_path):
@@ -42,12 +64,12 @@ def run_exact(ham, betas):
         S = stats["entropy"]
         M_abs = stats["|M|"]
         print(
-            f"beta: {beta:.3g} "
-            f"F: {F:.8g} "
-            f"E: {E:.8g} "
-            f"S: {S:.8g} "
-            f"|M|: {M_abs:.8g} "
-            f"time: {used_time:.3f}"
+            f"beta: {beta:.3g}",
+            f"F: {F:.8g}",
+            f"E: {E:.8g}",
+            f"S: {S:.8g}",
+            f"|M|: {M_abs:.8g}",
+            f"time: {used_time:.3f}",
         )
 
 
@@ -97,15 +119,15 @@ def train(net, opt_state, key, ham, optimizer, beta, n_steps):
         used_time = time.time() - start_time
 
         print(
-            f"beta: {beta:.3g} "
-            f"step: {step} "
-            f"F: {F:.8g} "
-            f"F_std: {F_std:.8g} "
-            f"E: {E:.8g} "
-            f"E_min: {E_min:.8g} "
-            f"S: {S:.8g} "
-            f"|M|: {M_abs:.8g} "
-            f"time: {used_time:.3f}"
+            f"beta: {beta:.3g}",
+            f"step: {step}",
+            f"F: {F:.8g}",
+            f"F_std: {F_std:.8g}",
+            f"E: {E:.8g}",
+            f"E_min: {E_min:.8g}",
+            f"S: {S:.8g}",
+            f"|M|: {M_abs:.8g}",
+            f"time: {used_time:.3f}",
         )
 
     return net, opt_state, key
@@ -134,6 +156,9 @@ def run_vmc(ham, betas):
         )
     else:
         raise ValueError(f"Unknown net_type: {args.net_type}")
+
+    n_params = tree_size_real_nonzero(net)
+    print("n_params:", n_params)
 
     optimizer = optax.adam(learning_rate=args.lr)
     opt_state = optimizer.init(eqx.filter(net, eqx.is_array))

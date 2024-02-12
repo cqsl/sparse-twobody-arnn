@@ -38,13 +38,13 @@ parser.add_argument(
 parser.add_argument(
     "--warmup_steps",
     type=int,
-    default=50,
+    default=500,
     help="optimization steps before starting the first annealing step",
 )
 parser.add_argument(
     "--opt_steps",
     type=int,
-    default=20,
+    default=200,
     help="optimization steps in each annealing step",
 )
 parser.add_argument(

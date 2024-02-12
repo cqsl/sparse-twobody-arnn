@@ -1,0 +1,7 @@
+equinox==0.11.3
+jax==0.4.24
+jaxtyping==0.2.25
+networkx==3.2.1
+numpy==1.26.4
+optax==0.1.9
+scipy==1.12.0
