@@ -1,4 +1,4 @@
-# TODO: Paper title
+# Sparse Autoregressive Neural Networks for Classical Spin Systems
 
 TODO: Paper link
 
