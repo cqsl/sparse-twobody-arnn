@@ -1,6 +1,6 @@
 # Sparse Autoregressive Neural Networks for Classical Spin Systems
 
-TODO: Paper link
+Paper link: [arXiv:2402.16579](https://arxiv.org/abs/2402.16579)
 
 The code uses [Equinox](https://github.com/patrick-kidger/equinox) to define neural networks.
 
